@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS登录页面</title>
+    <link rel="shortcut icon" href="img/MSLOGO1.gif" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            /* 渐变 */
+            background: #ad5389;
+            /* fallback for old browsers */
+            background: -webkit-linear-gradient(to right, #3c1053, #ad5389);
+            /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #3c1053, #ad5389);
+            /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 650px;
+            height: 350px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            text-align: left;
+            color: #666;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        input[type="submit"] {
+            margin-top: 22px;
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 95%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+		
+		button {
+		    margin-top: 22px;
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 95%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+		}
+		button:hover {
+		    background-color: #0056b3;
+		}
+		
+
+        #message {
+            margin-top: 20px;
+            color: #d9534f;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" style="display: flex; gap: 20px;">
+        <img src="img/loginLeft1.png" alt="" style="width: 300px;">
+        <div style="display: flex; align-items: center; flex-direction: column;  justify-content: center;">
+            <h2>MSWisdom</h2>
+            <form action="login.asp" method="post">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <input type="submit" value="Login">
+            </form>
+			<button onclick="window.location.href='http://sunfree.3vkj.club/SmallTool.html'">点击跳转小工具</button>
+            <!-- <div id="message"></div> -->
+        </div>
+    </div>
+    <script>
+        document.forms[0].onsubmit = async function(event) {
+            event.preventDefault();
+            const formData = new URLSearchParams();
+            formData.append('username', event.target.username.value);
+            formData.append('password', event.target.password.value);
+
+            const response = await fetch('login.asp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData.toString()
+            });
+            const result = await response.text();
+            // document.getElementById('message').innerText = result;
+            // 测试登录验证
+            if (result == "InvalidUsernameOrPassword") {
+                alert("登录失败，请检查用户名和密码");
+            } else {
+                var dateInit = new Date();
+                // 存储60天
+                dateInit.setTime(dateInit.getTime() + (60 * 24 * 60 * 60 * 1000));
+                var expires = "expires=" + dateInit.toUTCString();
+                // 设置cookie
+                document.cookie = "MSWorkCookie=" + encodeURIComponent(result) + "; " + expires + "; path=/";
+                checkCookie();
+            }
+        };
+
+        function checkCookie() {
+            // 这里不需要显式地获取或发送 MSWorkCookie，因为 AJAX 请求会自动包含匹配的 cookie  
+            // 发送 POST 请求到服务器  
+            fetch('checkLoginCondition.asp', {
+                    method: 'POST' // 注意：即使使用 POST 方法，cookie 也会自动包含在请求头中  
+                })
+                .then(response => response.text())
+                .then(responseText => {
+                    if (responseText === "success") {
+                        // 检测本地cookie正确，跳转页面
+                        // alert("成功");
+                        window.location.href = "http://sunfree.3vkj.club/WorkHuiZong.html";
+						// window.location.href = "http://sunfree.3vkj.club/SmallTool.html";
+                    } else if (responseText === "failure") {
+						// window.location.href = "http://sunfree.3vkj.club/SmallTool.html";
+                        console.log("请输入账号密码进行登录");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // 在页面加载时检查cookie  直接在header中执行检查方法
+        window.onload = checkCookie;
+    </script>
+</body>
+
+</html>
